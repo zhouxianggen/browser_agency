@@ -214,9 +214,21 @@ class OpenRequestHandler(PyObject, tornado.web.RequestHandler):
         return len(actions)
 
 
+class StatusRequestHandler(tornado.web.RequestHandler):
+    def head(self):
+        return self.get()
+
+    def post(self):
+        return self.get()
+
+    def get(self):
+        self.write('ok')
+
+
 class BrowserAgencyService(tornado.web.Application):
     def __init__(self):
         handlers = [
+                (r"/check", StatusRequestHandler),
                 (r"/_open", OpenRequestHandler)
         ]   
         settings = dict(
