@@ -1,7 +1,7 @@
 browser_agency
 ![](https://img.shields.io/badge/python%20-%203.7-brightgreen.svg)
 ========
-> gov file crawler
+> open url in browser
 
 ## `Install`
 ```
