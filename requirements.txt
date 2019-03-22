@@ -1,0 +1,5 @@
+requests
+tornado
+pyppeteer
+psutil
+git+https://github.com/zhouxianggen/pyobject.git
