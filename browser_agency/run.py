@@ -63,7 +63,9 @@ class BrowserContext(PyObject):
 
     async def launch_browser(self):
         self.log.info('launch browser')
-        self.browser = await pyppeteer.launch(args=['--no-sandbox'], 
+        self.browser = await pyppeteer.launch(
+                args=['--no-sandbox', '--proxy-server=http://114.55.31.211:8898'], 
+                #args=['--no-sandbox', ], 
                 ignoreHTTPSErrors=True, handleSIGHUP=False, autoClose=False)
         self.log.info('browser launched on [{}][{}]'.format(
                 self.browser.process.pid, self.browser.wsEndpoint))
@@ -153,7 +155,7 @@ class OpenRequestHandler(PyObject, tornado.web.RequestHandler):
     async def post(self):
         self.log.info('receiv POST request')
         url = self.get_argument('url', default='')
-        ua = self.get_argument('user-agency', default=DEFAULT_UA)
+        ua = self.get_argument('User-Agent', default=DEFAULT_UA)
         timeout = float(self.get_argument('timeout', default=5))
         actions = self.get_argument('actions', '[]')
         actions = json.loads(actions)
@@ -180,7 +182,13 @@ class OpenRequestHandler(PyObject, tornado.web.RequestHandler):
             if r == -1:
                 self.log.error('goto url failed')
                 return self.fail('GOTO_URL_FAILED')
-                
+            
+            # https://zhuanlan.zhihu.com/p/55274657
+            await page.evaluate('''() =>{ Object.defineProperties(navigator,{ webdriver:{ get: () => false } }) }''') 
+            await page.evaluate('''() =>{ window.navigator.chrome = { runtime: {},  }; }''')
+            await page.evaluate('''() =>{ Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en'] }); }''')
+            await page.evaluate('''() =>{ Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3, 4, 5,6], }); }''')
+
             idx = await self.do_actions(page, actions, timeout)
             html = await self.run_coroutine(page.content(), timeout)
             if html == None:
